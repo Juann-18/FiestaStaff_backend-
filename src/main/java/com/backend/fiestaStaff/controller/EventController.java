@@ -42,6 +42,7 @@ public class EventController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Event> getEvent(@PathVariable Long id) {
         User user = currentUser.get();
+
         return ResponseEntity.ok(eventService.getEventById(id, user));
     }
 }
