@@ -21,12 +21,9 @@ public class JwtService {
         this.jwtConfig = jwtConfig;
     }
 
-    public String generateToken(Long userId, String role, Long workerId) {
+    public String generateToken(Long userId, String role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
-        if (workerId != null) {
-            claims.put("workerId", workerId);
-        }
         return Jwts.builder()
                 .claims(claims)
                 .subject(userId.toString())
@@ -42,15 +39,6 @@ public class JwtService {
 
     public String extractRole(String token) {
         return extractClaim(token, claims -> claims.get("role", String.class));
-    }
-
-    public Long extractWorkerId(String token) {
-        return extractClaim(token, claims -> {
-            Object workerId = claims.get("workerId");
-            if (workerId == null) return null;
-            if (workerId instanceof Integer) return ((Integer) workerId).longValue();
-            return (Long) workerId;
-        });
     }
 
     public boolean isTokenValid(String token) {

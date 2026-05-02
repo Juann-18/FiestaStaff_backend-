@@ -49,12 +49,10 @@ public class JwtFilter extends OncePerRequestFilter {
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserById(userId);
                 if (jwtService.isTokenValid(jwt)) {
-                    Long workerId = jwtService.extractWorkerId(jwt);
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities()
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    request.setAttribute("workerId", workerId);
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }

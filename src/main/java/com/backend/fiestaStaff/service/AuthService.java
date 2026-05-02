@@ -4,9 +4,7 @@ import com.backend.fiestaStaff.dto.*;
 import com.backend.fiestaStaff.exception.ConflictException;
 import com.backend.fiestaStaff.exception.ResourceNotFoundException;
 import com.backend.fiestaStaff.model.User;
-import com.backend.fiestaStaff.model.Worker;
 import com.backend.fiestaStaff.repository.UserRepository;
-import com.backend.fiestaStaff.repository.WorkerRepository;
 import com.backend.fiestaStaff.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,16 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
-    private final WorkerRepository workerRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthService(UserRepository userRepository, WorkerRepository workerRepository,
+    public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder, JwtService jwtService,
                        AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
-        this.workerRepository = workerRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
@@ -49,19 +45,12 @@ public class AuthService {
 
         user = userRepository.save(user);
 
-        Long workerId = null;
-        Worker worker = workerRepository.findByUserId(user.getId()).orElse(null);
-        if (worker != null && worker.getStatus() == Worker.Status.ACTIVE) {
-            workerId = worker.getId();
-        }
-
-        String token = jwtService.generateToken(user.getId(), user.getRole().name(), workerId);
+        String token = jwtService.generateToken(user.getId(), user.getRole().name());
 
         AuthResponse response = new AuthResponse();
         response.setToken(token);
         response.setId(user.getId());
         response.setRole(user.getRole().name());
-        response.setWorkerId(workerId);
         return response;
     }
 
@@ -73,19 +62,12 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        Long workerId = null;
-        Worker worker = workerRepository.findByUserId(user.getId()).orElse(null);
-        if (worker != null && worker.getStatus() == Worker.Status.ACTIVE) {
-            workerId = worker.getId();
-        }
-
-        String token = jwtService.generateToken(user.getId(), user.getRole().name(), workerId);
+        String token = jwtService.generateToken(user.getId(), user.getRole().name());
 
         AuthResponse response = new AuthResponse();
         response.setToken(token);
         response.setId(user.getId());
         response.setRole(user.getRole().name());
-        response.setWorkerId(workerId);
         return response;
     }
 }

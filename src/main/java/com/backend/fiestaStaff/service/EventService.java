@@ -8,6 +8,7 @@ import com.backend.fiestaStaff.model.EventType;
 import com.backend.fiestaStaff.model.User;
 import com.backend.fiestaStaff.repository.EventRepository;
 import com.backend.fiestaStaff.repository.EventTypeRepository;
+import com.backend.fiestaStaff.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -17,10 +18,12 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final EventTypeRepository eventTypeRepository;
+    private final UserRepository userRepository;
 
-    public EventService(EventRepository eventRepository, EventTypeRepository eventTypeRepository) {
+    public EventService(EventRepository eventRepository, EventTypeRepository eventTypeRepository, UserRepository userRepository) {
         this.eventRepository = eventRepository;
         this.eventTypeRepository = eventTypeRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -55,5 +58,10 @@ public class EventService {
         }
 
         return event;
+    }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 }
