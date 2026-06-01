@@ -44,4 +44,10 @@ public class EventController {
         User user = currentUser.get();
         return ResponseEntity.ok(eventService.getEventById(id, user));
     }
+
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Event>> getAllEvents() {
+        return ResponseEntity.ok(eventService.getAllEvents());
+    }
 }

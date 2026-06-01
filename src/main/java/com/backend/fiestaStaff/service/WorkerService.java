@@ -69,7 +69,9 @@ public class WorkerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
         WeekDay weekDay = WeekDay.valueOf(event.getScheduledAt().getDayOfWeek().name());
-        return workerRepository.findAvailableWorkersByWeekDay(weekDay);
+        return workerRepository.findAvailableWorkersByWeekDayAndTime(
+                weekDay, event.getStartTime(), event.getEndTime()
+        );
     }
 
     @Transactional
@@ -107,6 +109,13 @@ public class WorkerService {
         List<EventWorker> assignments = eventWorkerRepository.findByWorkerId(workerId);
         return assignments.stream()
                 .map(EventWorker::getEvent)
+                .collect(Collectors.toList());
+    }
+
+    public List<Worker> getEventWorkers(Long eventId) {
+        List<EventWorker> assignments = eventWorkerRepository.findByEventId(eventId);
+        return assignments.stream()
+                .map(EventWorker::getWorker)
                 .collect(Collectors.toList());
     }
 }

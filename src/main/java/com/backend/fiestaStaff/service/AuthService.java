@@ -74,17 +74,20 @@ public class AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Long workerId = null;
+        String effectiveRole = user.getRole().name(); // default: ADMIN or USER
+
         Worker worker = workerRepository.findByUserId(user.getId()).orElse(null);
         if (worker != null && worker.getStatus() == Worker.Status.ACTIVE) {
             workerId = worker.getId();
+            effectiveRole = "WORKER"; // override: active worker takes precedence
         }
 
-        String token = jwtService.generateToken(user.getId(), user.getRole().name(), workerId);
+        String token = jwtService.generateToken(user.getId(), effectiveRole, workerId);
 
         AuthResponse response = new AuthResponse();
         response.setToken(token);
         response.setId(user.getId());
-        response.setRole(user.getRole().name());
+        response.setRole(effectiveRole);
         response.setWorkerId(workerId);
         return response;
     }

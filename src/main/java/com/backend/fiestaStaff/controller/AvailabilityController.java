@@ -56,4 +56,11 @@ public class AvailabilityController {
         Long workerId = currentUser.getWorkerId(httpRequest);
         return ResponseEntity.ok(workerService.getWorkerEvents(workerId));
     }
+
+    @GetMapping("/api/my-availability")
+    @PreAuthorize("hasRole('WORKER')")
+    public ResponseEntity<List<WorkerAvailability>> getMyAvailability(HttpServletRequest httpRequest) {
+        Long workerId = currentUser.getWorkerId(httpRequest);
+        return ResponseEntity.ok(availabilityService.getAvailabilityByWorker(workerId));
+    }
 }

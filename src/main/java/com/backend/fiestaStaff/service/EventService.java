@@ -17,10 +17,13 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final EventTypeRepository eventTypeRepository;
+    private final EmailService emailService;
 
-    public EventService(EventRepository eventRepository, EventTypeRepository eventTypeRepository) {
+    public EventService(EventRepository eventRepository, EventTypeRepository eventTypeRepository,
+                         EmailService emailService) {
         this.eventRepository = eventRepository;
         this.eventTypeRepository = eventTypeRepository;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -36,7 +39,9 @@ public class EventService {
         event.setStartTime(request.getStartTime());
         event.setEndTime(request.getEndTime());
 
-        return eventRepository.save(event);
+        Event savedEvent = eventRepository.save(event);
+        emailService.sendEventConfirmation(savedEvent, user);
+        return savedEvent;
     }
 
     public List<Event> getEventsByUser(User user) {
@@ -55,5 +60,34 @@ public class EventService {
         }
 
         return event;
+    }
+
+    public List<Event> getAllEvents() {
+        return eventRepository.findAll();
+    }
+
+    @Transactional
+    public Event updateEvent(Long id, EventRequest request) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
+
+        EventType eventType = eventTypeRepository.findById(request.getIdEventType())
+                .orElseThrow(() -> new ResourceNotFoundException("Event type not found"));
+
+        event.setEventType(eventType);
+        event.setLocation(request.getLocation());
+        event.setScheduledAt(request.getScheduledAt());
+        event.setStartTime(request.getStartTime());
+        event.setEndTime(request.getEndTime());
+
+        return eventRepository.save(event);
+    }
+
+    @Transactional
+    public void deleteEvent(Long id) {
+        if (!eventRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Event not found");
+        }
+        eventRepository.deleteById(id);
     }
 }
